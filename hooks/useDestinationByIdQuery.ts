@@ -1,7 +1,5 @@
-import { useMemo } from "react";
-
-// constants
-import { allDestinations } from "./mocks/destinations";
+//libs
+import { gql, useQuery } from "@apollo/client";
 
 // types
 import { Destination } from "@/types";
@@ -15,15 +13,28 @@ type ReturnType = {
   loading: boolean;
 };
 
+export const GET_DESTINATION_BY_ID = gql`
+  query GetDestinationById($id: ID!) {
+    getDestinationById(id: $id) {
+      description
+      favorite
+      id
+      location
+      name
+      rating
+    }
+  }
+`;
 // TODO: use apollo query for this
 export const useDestinationByIdQuery = ({ id }: Params): ReturnType => {
-  const destination = useMemo(
-    () => allDestinations.find((destination) => destination.id === id),
-    [id]
-  );
+  const { data, loading } = useQuery(GET_DESTINATION_BY_ID, {
+    variables: {
+      id,
+    },
+  });
 
   return {
-    destination,
-    loading: false,
+    destination: data?.getDestinationById,
+    loading,
   };
 };

@@ -2,7 +2,7 @@
 import { useCallback, useState } from "react";
 import { MapPin, Star, Edit, Heart, Trash2 as Trash } from "lucide-react";
 import { motion } from "framer-motion";
-import { toast, Toaster } from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
 
 // components
 import { Button } from "@/components/ui/button";
@@ -12,31 +12,40 @@ import { Tombstone } from "./Tombstone";
 
 // hooks
 import { useDestinationByIdQuery } from "@/hooks/useDestinationByIdQuery";
+import { useDeleteDestinationMutation } from "@/hooks/useDeleteDestinationMutation";
+import { useMarkFavoriteMutation } from "@/hooks/useMarkFavoriteMutation";
+import { useUpdateMutation } from "@/hooks/useUpdateMutation";
 
 // types
-import { Destination } from "@/types";
+import type { Destination } from "@/types";
 
 export function Detail({ id }: { id: string }) {
   const { destination, loading } = useDestinationByIdQuery({ id });
   const [isModalOpen, setIsModalOpen] = useState(false);
-
+  const updateDestination = useUpdateMutation();
+  const deleteDestination = useDeleteDestinationMutation();
   const isFavorite = destination?.favorite;
 
-  const onSubmit = useCallback((_values: Partial<Destination>) => {
-    // TODO: call destination mutation here
-    setIsModalOpen(false);
-    toast.error("Unhandled!");
-  }, []);
+  const toggleFavorite = useMarkFavoriteMutation({ isFavorite });
+
+  const onSubmit = useCallback(
+    (_values: Partial<Destination>) => {
+      // TODO: call destination mutation here
+      updateDestination({ id, _values });
+      setIsModalOpen(false);
+    },
+    [id, updateDestination]
+  );
 
   const handleDelete = useCallback(() => {
     // TODO: call destination mutation here
-    toast.error("Unhandled!");
-  }, []);
+    deleteDestination({ id });
+  }, [deleteDestination, id]);
 
-  const toggleFavorite = useCallback(() => {
+  const addOrRemovefavorite = useCallback(() => {
     // TODO: add handling for favorite here
-    toast.success(isFavorite ? "Removed from favorites" : "Added to favorites");
-  }, [isFavorite]);
+    toggleFavorite({ markFavoriteId: id });
+  }, [id, toggleFavorite]);
 
   if (loading) {
     return <Tombstone />;
@@ -80,7 +89,7 @@ export function Detail({ id }: { id: string }) {
               variant="ghost"
               size="icon"
               className="absolute top-2 right-2 bg-white rounded-full"
-              onClick={() => toggleFavorite()}
+              onClick={() => addOrRemovefavorite()}
               aria-label={
                 isFavorite ? "Remove from favorites" : "Add to favorites"
               }

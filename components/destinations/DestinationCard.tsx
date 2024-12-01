@@ -2,6 +2,9 @@ import { useCallback } from "react";
 import Link from "next/link";
 import { MapPin, Star, Heart } from "lucide-react";
 
+//hooks
+import { useMarkFavoriteMutation } from "@/hooks/useMarkFavoriteMutation";
+
 // components
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -15,11 +18,17 @@ export const DestinationCard = ({
   destination: Destination;
 }) => {
   const { id, name, favorite, location, rating } = destination;
-  const toggleFavorite = useCallback((event) => {
-    event.preventDefault();
-    // TODO: implement this
-    console.log("Unimplemented");
-  }, []);
+  const isFavorite = destination?.favorite;
+  const toggleFavorite = useMarkFavoriteMutation({ isFavorite });
+  const addOrRemoveFavorite = useCallback(
+    (event: { preventDefault: () => void }) => {
+      event.preventDefault();
+      // TODO: implement this
+      toggleFavorite({ markFavoriteId: id });
+      console.log("Unimplemented");
+    },
+    [id, toggleFavorite]
+  );
 
   return (
     <Link key={id} href={`/destination/${id}`}>
@@ -34,7 +43,7 @@ export const DestinationCard = ({
             variant="ghost"
             size="icon"
             className="absolute top-2 right-2 bg-white rounded-full"
-            onClick={toggleFavorite}
+            onClick={addOrRemoveFavorite}
             aria-label={favorite ? "Remove from favorites" : "Add to favorites"}
           >
             <Heart

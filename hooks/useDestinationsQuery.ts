@@ -1,7 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
-
-// constants
-import { allDestinations } from "./mocks/destinations";
+//libs
+import { useQuery, gql } from "@apollo/client";
 
 // types
 import { Destination } from "@/types";
@@ -21,32 +19,29 @@ type ReturnType = {
 
 const DEFAULT_SIZE = 3;
 
+export const GET_DESTINATIONS_QUERY = gql`
+  query destinations($page: Int!, $size: Int!) {
+    destinations(page: $page, size: $size) {
+      results {
+        description
+        favorite
+        id
+        location
+        name
+        rating
+      }
+    }
+  }
+`;
+
 // TODO: use apollo query for this
 export const useDestinationsQuery = ({
   page,
   size = DEFAULT_SIZE,
 }: Params): ReturnType => {
-  const [loading, setLoading] = useState(false);
-  const data = useMemo(
-    () => ({
-      results: allDestinations.slice(page * size, page * size + size),
-      totalCount: allDestinations.length,
-    }),
-    [page, size]
-  );
+  const { data, loading } = useQuery(GET_DESTINATIONS_QUERY, {
+    variables: { page, size },
+  });
 
-  useEffect(() => {
-    if (page) {
-      setLoading(true);
-      const timeout = setTimeout(() => {
-        setLoading(false);
-      }, 800);
-
-      return () => {
-        clearTimeout(timeout);
-      };
-    }
-  }, [page]);
-
-  return { data: loading ? undefined : data, loading };
+  return { data: data?.destinations, loading };
 };

@@ -3,23 +3,32 @@ import { Plus, Server } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useState } from "react";
 import { Dialog, DialogTrigger } from "@radix-ui/react-dialog";
-import toast from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
+
+//hooks
+import { useAddNewDestinationMutation } from "@/hooks/useAddNewDestinationMutation";
 
 // components
 import { DestinationForm } from "@/components/DestinationForm";
 import { Button } from "@/components/ui/button";
 
 // types
-import { Destination } from "@/types";
+import type { Destination } from "@/types";
 
 export const Header = (): JSX.Element => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const onSubmit = useCallback((_values: Partial<Destination>) => {
-    // TODO: call destination mutation here and redirect to it's page
-    setIsModalOpen(false);
-    toast.error("Unhandled!");
-  }, []);
+  const addNewDestination = useAddNewDestinationMutation();
+  const onSubmit = useCallback(
+    (_values: Partial<Destination>) => {
+      // TODO: call destination mutation here and redirect to it's page
+      console.log(_values);
+      addNewDestination({
+        variables: { task: _values },
+      });
+      setIsModalOpen(false);
+    },
+    [addNewDestination]
+  );
 
   return (
     <div className="flex gap-4 items-center p-5 bg-white rounded-2xl justify-between border">
@@ -43,6 +52,7 @@ export const Header = (): JSX.Element => {
           </a>
         </Button>
       </div>
+      <Toaster />
     </div>
   );
 };
